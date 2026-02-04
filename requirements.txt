@@ -1,0 +1,17 @@
+<<<<<<< HEAD
+python-dotenv
+groq
+werkzeug
+flask
+flask-cors
+gunicorn
+=======
+flask
+flask-cors
+python-dotenv
+groq
+werkzeug
+flask
+flask-cors
+gunicorn
+>>>>>>> c9f2407 (Fix project structure for Render deployment)
