@@ -12,7 +12,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: url("/static/agri1.jpg") no-repeat center center fixed;
+  background: url("/static/agri 1.jpg") no-repeat center center fixed;
   background-size: cover;
 }
 
@@ -27,7 +27,7 @@ body::before {
 .chatbox {
   width: 420px;
   height: 620px;
-  background: rgba(255,255,255,0.97);
+  background: rgba(255,255,255,0.96);
   border-radius: 16px;
   display: flex;
   flex-direction: column;
@@ -58,7 +58,6 @@ body::before {
   padding: 10px 12px;
   border-radius: 10px;
   font-size: 14px;
-  white-space: pre-wrap;
 }
 
 .user {
@@ -102,13 +101,13 @@ button {
 
   <div class="messages" id="messages">
     <div class="msg bot">
-Hello! I’m your FarmFluence AI assistant.
-Ask me anything about crops, irrigation, soil, or plant health.
+      👋 Hello! I’m your FarmFluence AI assistant.<br>
+      Ask me anything about your crops.
     </div>
   </div>
 
   <div class="input">
-    <input id="userInput" placeholder="Type your farming question..." />
+    <input id="userInput" placeholder="Type or speak your question..." />
     <button onclick="startListening()">🎙️</button>
     <button onclick="sendMessage()">➤</button>
   </div>
@@ -142,7 +141,7 @@ async function sendMessage() {
     });
 
     const data = await res.json();
-    addMessage(data.reply, "bot");
+    addMessage(data.reply, "bot");   // ❌ NO SPEAKING
 
   } catch {
     addMessage("⚠️ Unable to connect to FarmFluence AI", "bot");
@@ -153,7 +152,7 @@ userInput.addEventListener("keydown", e => {
   if (e.key === "Enter") sendMessage();
 });
 
-/* 🎤 Voice INPUT only (no speaking output) */
+/* 🎤 Voice INPUT ONLY */
 function startListening() {
   if (!("webkitSpeechRecognition" in window)) {
     alert("Voice input works only in Chrome");
