@@ -84,7 +84,7 @@ def build_context(user_message):
     }
 
     return [system_prompt, user_prompt]
-=======
+
 def build_context(user_message):
     system_prompt = {
         "role": "system",
@@ -171,4 +171,3 @@ def build_context(user_message):
     }
 
     return [system_prompt, user_prompt]
->>>>>>> c9f2407 (Fix project structure for Render deployment)
