@@ -11,6 +11,6 @@ def ask_llm(messages):
         model="llama-3.1-8b-instant",
         messages=messages,
         temperature=0.5,
-        max_tokens=300
+        max_tokens=1500
     )
     return response.choices[0].message.content.strip()
