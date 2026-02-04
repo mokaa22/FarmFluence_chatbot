@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 def build_context(user_message):
     system_prompt = {
         "role": "system",
