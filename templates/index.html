@@ -5,6 +5,7 @@
 <title>FarmFluence AI Assistant</title>
 
 <style>
+/* ====== BASE PAGE ====== */
 body {
   margin: 0;
   height: 100vh;
@@ -24,6 +25,7 @@ body::before {
   z-index: -1;
 }
 
+/* ====== CHAT BOX ====== */
 .chatbox {
   width: 420px;
   height: 620px;
@@ -91,11 +93,63 @@ button {
   cursor: pointer;
   font-size: 16px;
 }
+
+/* ====== WAKE UP SCREEN ====== */
+#wake-screen {
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.97);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+}
+
+.wake-box {
+  text-align: center;
+  max-width: 420px;
+  padding: 30px;
+  border-radius: 16px;
+  background: white;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.wake-box h2 {
+  color: #2e7d32;
+  margin-bottom: 12px;
+}
+
+.wake-box p {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 18px;
+}
+
+.timer {
+  font-weight: bold;
+  font-size: 16px;
+  color: #1b5e20;
+}
 </style>
 </head>
 
 <body>
 
+<!-- ====== WAKE UP OVERLAY ====== -->
+<div id="wake-screen">
+  <div class="wake-box">
+    <h2>🌱 FarmFluence AI Assistant is starting</h2>
+    <p>
+      Our servers go to sleep when idle to save resources.<br>
+      Please wait while we wake them up.
+    </p>
+    <div class="timer">
+      Starting in <span id="countdown">40</span> seconds…
+    </div>
+  </div>
+</div>
+
+<!-- ====== CHAT UI ====== -->
 <div class="chatbox">
   <div class="header">🌾 FarmFluence AI Assistant</div>
 
@@ -107,16 +161,34 @@ button {
   </div>
 
   <div class="input">
-    <input id="userInput" placeholder="Type or speak your question..." />
+    <input id="userInput" placeholder="Type or speak your question..." disabled />
     <button onclick="startListening()">🎙️</button>
     <button onclick="sendMessage()">➤</button>
   </div>
 </div>
 
 <script>
+/* ====== WAKE UP TIMER ====== */
+let timeLeft = 40;
+const countdownEl = document.getElementById("countdown");
+const wakeScreen = document.getElementById("wake-screen");
+const userInput = document.getElementById("userInput");
+
+const wakeTimer = setInterval(() => {
+  timeLeft--;
+  countdownEl.innerText = timeLeft;
+
+  if (timeLeft <= 0) {
+    clearInterval(wakeTimer);
+    wakeScreen.style.display = "none";
+    userInput.disabled = false;
+    userInput.focus();
+  }
+}, 1000);
+
+/* ====== CHAT LOGIC ====== */
 const API_URL = "/chat";
 const messages = document.getElementById("messages");
-const userInput = document.getElementById("userInput");
 
 function addMessage(text, sender) {
   const div = document.createElement("div");
@@ -141,7 +213,7 @@ async function sendMessage() {
     });
 
     const data = await res.json();
-    addMessage(data.reply, "bot");   // ❌ NO SPEAKING
+    addMessage(data.reply, "bot");
 
   } catch {
     addMessage("⚠️ Unable to connect to FarmFluence AI", "bot");
@@ -152,7 +224,7 @@ userInput.addEventListener("keydown", e => {
   if (e.key === "Enter") sendMessage();
 });
 
-/* 🎤 Voice INPUT ONLY */
+/* ====== VOICE INPUT ONLY ====== */
 function startListening() {
   if (!("webkitSpeechRecognition" in window)) {
     alert("Voice input works only in Chrome");
