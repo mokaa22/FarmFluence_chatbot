@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FarmFluence AI Assistant</title>
 
 <style>
@@ -12,30 +13,27 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: url("/static/agri 1.jpg") no-repeat center center fixed;
+  background:
+    linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)),
+    url("/static/agri 1.jpg") no-repeat center center fixed;
   background-size: cover;
+  background-color: #1b5e20;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.35);
-  z-index: -1;
-}
-
-/* Chat Box */
+/* Chat Container */
 .chatbox {
   width: 420px;
-  height: 620px;
+  height: 85vh;
+  max-height: 620px;
   background: rgba(255,255,255,0.96);
   border-radius: 16px;
-  display: none;
+  display: flex;
   flex-direction: column;
   overflow: hidden;
   box-shadow: 0 20px 40px rgba(0,0,0,0.35);
 }
 
+/* Header */
 .header {
   background: linear-gradient(135deg, #2e7d32, #1b5e20);
   color: white;
@@ -44,6 +42,7 @@ body::before {
   font-weight: bold;
 }
 
+/* Messages */
 .messages {
   flex: 1;
   padding: 14px;
@@ -71,9 +70,13 @@ body::before {
   align-self: flex-start;
 }
 
+/* Input */
 .input {
   display: flex;
   border-top: 1px solid #ddd;
+  position: sticky;
+  bottom: 0;
+  background: white;
 }
 
 input {
@@ -93,59 +96,53 @@ button {
   font-size: 16px;
 }
 
-/* Wake Screen */
-#wakeScreen {
-  width: 420px;
-  height: 260px;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.35);
-  display: none;
+/* Wake-up overlay */
+#wakeup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
-  padding: 24px;
+  z-index: 999;
+  display: none;
 }
 
-#wakeScreen h2 {
-  color: #2e7d32;
-  margin-bottom: 10px;
-}
-
-#wakeScreen p {
-  color: #555;
-  font-size: 14px;
-}
-
-#countdown {
+#wakeup span {
+  font-size: 18px;
   margin-top: 12px;
-  font-weight: bold;
-  color: #2e7d32;
+}
+
+/* Mobile fixes */
+@media (max-width: 600px) {
+  .chatbox {
+    width: 95%;
+    height: 90vh;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<!-- Wake Screen -->
-<div id="wakeScreen">
-  <h2>🌱 FarmFluence AI Assistant is starting</h2>
-  <p>
-    Our servers go to sleep when idle to save resources.<br>
-    Please wait while we wake them up.
-  </p>
-  <div id="countdown">Starting in 40 seconds...</div>
+<!-- Wake-up Screen -->
+<div id="wakeup">
+  <h2>🌾 FarmFluence AI Assistant is starting</h2>
+  <p>Our servers sleep when idle to save resources.</p>
+  <span>Waking up… <b id="countdown">45</b> sec</span>
 </div>
 
 <!-- Chat UI -->
-<div class="chatbox" id="chatbox">
+<div class="chatbox" id="chatbox" style="display:none;">
   <div class="header">🌾 FarmFluence AI Assistant</div>
 
   <div class="messages" id="messages">
     <div class="msg bot">
       👋 Hello! I’m your FarmFluence AI assistant.<br>
-      Ask me anything about your crops.
+      Ask me anything about agriculture.
     </div>
   </div>
 
@@ -160,14 +157,43 @@ button {
 const API_URL = "/chat";
 const HEALTH_URL = "/health";
 
-const chatbox = document.getElementById("chatbox");
-const wakeScreen = document.getElementById("wakeScreen");
-const countdownEl = document.getElementById("countdown");
-
 const messages = document.getElementById("messages");
 const userInput = document.getElementById("userInput");
+const chatbox = document.getElementById("chatbox");
+const wakeup = document.getElementById("wakeup");
+const countdownEl = document.getElementById("countdown");
 
-/* ---------- Utility ---------- */
+/* Check backend status */
+async function checkBackend() {
+  try {
+    const res = await fetch(HEALTH_URL, { cache: "no-store" });
+    if (res.ok) {
+      wakeup.style.display = "none";
+      chatbox.style.display = "flex";
+      return;
+    }
+  } catch {}
+
+  showWakeup();
+}
+
+/* Wake-up screen logic */
+function showWakeup() {
+  wakeup.style.display = "flex";
+  let time = 45;
+
+  const timer = setInterval(() => {
+    time--;
+    countdownEl.innerText = time;
+
+    if (time <= 0) {
+      clearInterval(timer);
+      location.reload();
+    }
+  }, 1000);
+}
+
+/* Messages */
 function addMessage(text, sender) {
   const div = document.createElement("div");
   div.className = "msg " + sender;
@@ -176,7 +202,7 @@ function addMessage(text, sender) {
   messages.scrollTop = messages.scrollHeight;
 }
 
-/* ---------- Chat ---------- */
+/* Send message */
 async function sendMessage() {
   const text = userInput.value.trim();
   if (!text) return;
@@ -195,15 +221,16 @@ async function sendMessage() {
     addMessage(data.reply, "bot");
 
   } catch {
-    addMessage("⚠️ Unable to connect to FarmFluence AI", "bot");
+    addMessage("⚠️ Unable to connect. Please wait…", "bot");
   }
 }
 
+/* Enter key */
 userInput.addEventListener("keydown", e => {
   if (e.key === "Enter") sendMessage();
 });
 
-/* ---------- Voice INPUT only ---------- */
+/* Voice INPUT only */
 function startListening() {
   if (!("webkitSpeechRecognition" in window)) {
     alert("Voice input works only in Chrome");
@@ -222,62 +249,13 @@ function startListening() {
   rec.start();
 }
 
-/* ---------- Wake Logic ---------- */
-function fetchWithTimeout(resource, timeout = 3000) {
-  return Promise.race([
-    fetch(resource),
-    new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("timeout")), timeout)
-    )
-  ]);
-}
+/* Auto scroll on keyboard open */
+window.addEventListener("resize", () => {
+  messages.scrollTop = messages.scrollHeight;
+});
 
-async function checkBackend() {
-  try {
-    await fetchWithTimeout(HEALTH_URL, 3000);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function showChat() {
-  wakeScreen.style.display = "none";
-  chatbox.style.display = "flex";
-}
-
-function showWakeScreen() {
-  wakeScreen.style.display = "flex";
-  chatbox.style.display = "none";
-}
-
-async function startApp() {
-  const isAwake = await checkBackend();
-
-  if (isAwake) {
-    showChat();
-    return;
-  }
-
-  // Backend sleeping
-  showWakeScreen();
-
-  let seconds = 40;
-  countdownEl.innerText = `Starting in ${seconds} seconds...`;
-
-  const countdown = setInterval(async () => {
-    seconds--;
-    countdownEl.innerText = `Starting in ${seconds} seconds...`;
-
-    const awake = await checkBackend();
-    if (awake || seconds <= 0) {
-      clearInterval(countdown);
-      showChat();
-    }
-  }, 1000);
-}
-
-startApp();
+/* Start */
+checkBackend();
 </script>
 
 </body>
