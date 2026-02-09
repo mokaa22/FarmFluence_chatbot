@@ -5,7 +5,6 @@
 <title>FarmFluence AI Assistant</title>
 
 <style>
-/* ====== BASE PAGE ====== */
 body {
   margin: 0;
   height: 100vh;
@@ -13,7 +12,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: url("/static/agri 1.jpg") no-repeat center center fixed;
+  background: url("/static/agri1.jpg") no-repeat center center fixed;
   background-size: cover;
 }
 
@@ -25,13 +24,13 @@ body::before {
   z-index: -1;
 }
 
-/* ====== CHAT BOX ====== */
+/* Chat Box */
 .chatbox {
   width: 420px;
   height: 620px;
   background: rgba(255,255,255,0.96);
   border-radius: 16px;
-  display: flex;
+  display: none;
   flex-direction: column;
   overflow: hidden;
   box-shadow: 0 20px 40px rgba(0,0,0,0.35);
@@ -94,102 +93,81 @@ button {
   font-size: 16px;
 }
 
-/* ====== WAKE UP SCREEN ====== */
-#wake-screen {
-  position: fixed;
-  inset: 0;
-  background: rgba(255,255,255,0.97);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 99999;
-}
-
-.wake-box {
-  text-align: center;
-  max-width: 420px;
-  padding: 30px;
-  border-radius: 16px;
+/* Wake Screen */
+#wakeScreen {
+  width: 420px;
+  height: 260px;
   background: white;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 24px;
 }
 
-.wake-box h2 {
+#wakeScreen h2 {
   color: #2e7d32;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
-.wake-box p {
-  font-size: 14px;
+#wakeScreen p {
   color: #555;
-  margin-bottom: 18px;
+  font-size: 14px;
 }
 
-.timer {
+#countdown {
+  margin-top: 12px;
   font-weight: bold;
-  font-size: 16px;
-  color: #1b5e20;
+  color: #2e7d32;
 }
 </style>
 </head>
 
 <body>
 
-<!-- ====== WAKE UP OVERLAY ====== -->
-<div id="wake-screen">
-  <div class="wake-box">
-    <h2>🌱 FarmFluence AI Assistant is starting</h2>
-    <p>
-      Our servers go to sleep when idle to save resources.<br>
-      Please wait while we wake them up.
-    </p>
-    <div class="timer">
-      Starting in <span id="countdown">40</span> seconds…
-    </div>
-  </div>
+<!-- Wake Screen -->
+<div id="wakeScreen">
+  <h2>🌱 FarmFluence AI Assistant is starting</h2>
+  <p>
+    Our servers go to sleep when idle to save resources.<br>
+    Please wait while we wake them up.
+  </p>
+  <div id="countdown">Starting in 40 seconds...</div>
 </div>
 
-<!-- ====== CHAT UI ====== -->
-<div class="chatbox">
+<!-- Chat UI -->
+<div class="chatbox" id="chatbox">
   <div class="header">🌾 FarmFluence AI Assistant</div>
 
   <div class="messages" id="messages">
     <div class="msg bot">
       👋 Hello! I’m your FarmFluence AI assistant.<br>
-      Ask me anything about your crops. Please enter your name and location.
+      Ask me anything about your crops.
     </div>
   </div>
 
   <div class="input">
-    <input id="userInput" placeholder="Type or speak your question..." disabled />
+    <input id="userInput" placeholder="Type or speak your question..." />
     <button onclick="startListening()">🎙️</button>
     <button onclick="sendMessage()">➤</button>
   </div>
 </div>
 
 <script>
-/* ====== WAKE UP TIMER ====== */
-let timeLeft = 40;
+const API_URL = "/chat";
+const HEALTH_URL = "/health";
+
+const chatbox = document.getElementById("chatbox");
+const wakeScreen = document.getElementById("wakeScreen");
 const countdownEl = document.getElementById("countdown");
-const wakeScreen = document.getElementById("wake-screen");
+
+const messages = document.getElementById("messages");
 const userInput = document.getElementById("userInput");
 
-const wakeTimer = setInterval(() => {
-  timeLeft--;
-  countdownEl.innerText = timeLeft;
-
-  if (timeLeft <= 0) {
-    clearInterval(wakeTimer);
-    wakeScreen.style.display = "none";
-    userInput.disabled = false;
-    userInput.focus();
-  }
-}, 1000);
-
-/* ====== CHAT LOGIC ====== */
-const API_URL = "/chat";
-const messages = document.getElementById("messages");
-
+/* ---------- Utility ---------- */
 function addMessage(text, sender) {
   const div = document.createElement("div");
   div.className = "msg " + sender;
@@ -198,6 +176,7 @@ function addMessage(text, sender) {
   messages.scrollTop = messages.scrollHeight;
 }
 
+/* ---------- Chat ---------- */
 async function sendMessage() {
   const text = userInput.value.trim();
   if (!text) return;
@@ -224,7 +203,7 @@ userInput.addEventListener("keydown", e => {
   if (e.key === "Enter") sendMessage();
 });
 
-/* ====== VOICE INPUT ONLY ====== */
+/* ---------- Voice INPUT only ---------- */
 function startListening() {
   if (!("webkitSpeechRecognition" in window)) {
     alert("Voice input works only in Chrome");
@@ -242,6 +221,63 @@ function startListening() {
 
   rec.start();
 }
+
+/* ---------- Wake Logic ---------- */
+function fetchWithTimeout(resource, timeout = 3000) {
+  return Promise.race([
+    fetch(resource),
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("timeout")), timeout)
+    )
+  ]);
+}
+
+async function checkBackend() {
+  try {
+    await fetchWithTimeout(HEALTH_URL, 3000);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function showChat() {
+  wakeScreen.style.display = "none";
+  chatbox.style.display = "flex";
+}
+
+function showWakeScreen() {
+  wakeScreen.style.display = "flex";
+  chatbox.style.display = "none";
+}
+
+async function startApp() {
+  const isAwake = await checkBackend();
+
+  if (isAwake) {
+    showChat();
+    return;
+  }
+
+  // Backend sleeping
+  showWakeScreen();
+
+  let seconds = 40;
+  countdownEl.innerText = `Starting in ${seconds} seconds...`;
+
+  const countdown = setInterval(async () => {
+    seconds--;
+    countdownEl.innerText = `Starting in ${seconds} seconds...`;
+
+    const awake = await checkBackend();
+    if (awake || seconds <= 0) {
+      clearInterval(countdown);
+      showChat();
+    }
+  }, 1000);
+}
+
+startApp();
 </script>
 
 </body>
