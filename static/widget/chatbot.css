@@ -4,9 +4,9 @@
 
 #farm-chatbot-widget {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  font-family: Arial, sans-serif;
+  bottom: 16px;
+  right: 16px;
+  font-family: "Segoe UI", sans-serif;
   z-index: 99999;
 }
 
@@ -22,24 +22,25 @@
   justify-content: center;
   cursor: pointer;
   font-size: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
 }
 
 /* Chat box */
 #chat-box {
-  width: 320px;
-  height: 420px;
+  width: 340px;
+  height: 480px;
   background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
   display: flex;
   flex-direction: column;
   position: absolute;
-  bottom: 70px;
+  bottom: 72px;
   right: 0;
+  overflow: hidden;
 }
 
-/* Hidden state */
+/* Hidden */
 .hidden {
   display: none;
 }
@@ -48,8 +49,8 @@
 #chat-header {
   background: #2e7d32;
   color: #ffffff;
-  padding: 10px;
-  font-weight: bold;
+  padding: 12px;
+  font-weight: 600;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -58,18 +59,19 @@
 /* Body */
 #chat-body {
   flex: 1;
-  padding: 10px;
+  padding: 12px;
   overflow-y: auto;
-  background: #f6f6f6;
+  background: #f4f6f7;
 }
 
 /* Messages */
 .msg {
-  margin-bottom: 8px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  max-width: 80%;
+  margin-bottom: 10px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  max-width: 85%;
   word-wrap: break-word;
+  font-size: 14px;
 }
 
 .msg.user {
@@ -87,20 +89,55 @@
 #chat-footer {
   display: flex;
   border-top: 1px solid #ddd;
+  background: #ffffff;
 }
 
 #chat-input {
   flex: 1;
   border: none;
-  padding: 10px;
+  padding: 12px;
   outline: none;
+  font-size: 14px;
 }
 
 #chat-send {
   border: none;
   background: #2e7d32;
   color: white;
-  padding: 0 16px;
+  padding: 0 18px;
   cursor: pointer;
+  font-size: 18px;
 }
 
+/* ===============================
+   📱 MOBILE RESPONSIVE FIX
+   =============================== */
+@media (max-width: 600px) {
+
+  #farm-chatbot-widget {
+    right: 12px;
+    bottom: 12px;
+  }
+
+  #chat-box {
+    width: calc(100vw - 24px);
+    height: calc(100vh - 120px);
+    right: 0;
+    bottom: 70px;
+    border-radius: 12px;
+  }
+
+  #chat-toggle {
+    width: 52px;
+    height: 52px;
+    font-size: 22px;
+  }
+
+  .msg {
+    font-size: 13px;
+  }
+
+  #chat-input {
+    font-size: 13px;
+  }
+}
