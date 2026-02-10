@@ -4,8 +4,9 @@
      =============================== */
   const css = document.createElement("link");
   css.rel = "stylesheet";
-  css.href = "/static/widget/chatbot.css";
+  css.href = "https://ai.farmfluence.online/static/widget/chatbot.css";
   document.head.appendChild(css);
+
 
   /* ===============================
      Create Widget
