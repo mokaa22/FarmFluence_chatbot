@@ -112,7 +112,7 @@
     showTyping();
 
     try {
-      const res = await fetch("/chat", {
+      const res = await fetch("https://ai.farmfluence.online/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text })
@@ -154,5 +154,5 @@
      Initial State
      =============================== */
   closeChat();
-  addMessage("👋 Hi! Ask me anything about farming.", "bot");
+  addMessage("👋 Hi! Ask me anything about farming.Please enter your name & location.", "bot");
 })();
