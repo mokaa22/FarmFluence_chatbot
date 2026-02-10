@@ -13,7 +13,6 @@ app = Flask(
 
 CORS(app)
 
-
 # ---------------------------
 # Home Page
 # ---------------------------
@@ -23,7 +22,7 @@ def home():
 
 
 # ---------------------------
-# Health Check (for Render wake-up)
+# Health Check (Render / uptime)
 # ---------------------------
 @app.route("/health", methods=["GET"])
 def health():
@@ -31,7 +30,7 @@ def health():
 
 
 # ---------------------------
-# Chat API
+# Chat API (USED BY WIDGET)
 # ---------------------------
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -39,15 +38,32 @@ def chat():
         data = request.get_json(force=True)
         user_message = data.get("message", "").strip()
 
+        # 1️⃣ Empty input guard
         if not user_message:
             return jsonify({
                 "reply": "Please type a farming-related question 🌱"
             })
 
-        # Build system + user context
+        # 2️⃣ Handle vague replies BEFORE LLM
+        vague_inputs = ["yes", "ok", "okay", "haan", "ha", "hmm", "okok"]
+
+        if user_message.lower() in vague_inputs:
+            return jsonify({
+                "reply": (
+                    "👍 No problem.\n"
+                    "What would you like help with?\n"
+                    "1️⃣ Crop management\n"
+                    "2️⃣ Irrigation guidance\n"
+                    "3️⃣ Pest & disease control\n"
+                    "4️⃣ Bird protection methods\n"
+                    "5️⃣ Talk to an expert"
+                )
+            })
+
+        # 3️⃣ Build system + user context
         messages = build_context(user_message)
 
-        # Call LLM
+        # 4️⃣ Call LLM (Groq via llm.py)
         reply = ask_llm(messages)
 
         return jsonify({"reply": reply})
@@ -61,12 +77,8 @@ def chat():
 
 
 # ---------------------------
-# Run locally only
+# Run App
 # ---------------------------
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
-
-
-if __name__ == "__main__":
     print(">>> FarmFluence server running <<<")
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
