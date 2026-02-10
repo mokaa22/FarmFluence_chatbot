@@ -51,9 +51,10 @@
   // 4️⃣ Open / Close Widget
   // ===============================
   toggleBtn.onclick = () => {
-    chatBox.classList.toggle("hidden");
-    chatInput.focus();
-  };
+  chatBox.classList.toggle("hidden");
+  setTimeout(() => chatInput.focus(), 200);
+};
+
 
   closeBtn.onclick = () => {
     chatBox.classList.add("hidden");
