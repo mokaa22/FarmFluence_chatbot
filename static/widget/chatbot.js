@@ -8,14 +8,14 @@
   document.head.appendChild(css);
 
   /* ===============================
-     Create Widget HTML
+     Create Widget
      =============================== */
   const widget = document.createElement("div");
   widget.id = "farm-chatbot-widget";
   widget.innerHTML = `
-    <div id="chat-toggle" title="Chat with FarmFluence AI">🌱</div>
+    <div id="chat-toggle">🌱</div>
 
-    <div id="chat-box" class="hidden">
+    <div id="chat-box">
       <div id="chat-header">
         <span>FarmFluence AI</span>
         <span id="chat-close">✖</span>
@@ -24,13 +24,8 @@
       <div id="chat-body"></div>
 
       <div id="chat-footer">
-        <input
-          id="chat-input"
-          type="text"
-          placeholder="Ask your farming question..."
-          autocomplete="off"
-        />
-        <button id="chat-mic" title="Voice input">🎙️</button>
+        <input id="chat-input" placeholder="Ask your farming question..." />
+        <button id="chat-mic">🎙️</button>
         <button id="chat-send">➤</button>
       </div>
     </div>
@@ -49,21 +44,36 @@
   const micBtn = document.getElementById("chat-mic");
 
   /* ===============================
-     Toggle Logic
+     STATE (single source of truth)
+     =============================== */
+  let isOpen = false;
+
+  function openChat() {
+    chatBox.style.display = "flex";
+    toggleBtn.style.display = "none";
+    isOpen = true;
+    setTimeout(() => chatInput.focus(), 150);
+  }
+
+  function closeChat() {
+    chatBox.style.display = "none";
+    toggleBtn.style.display = "flex";
+    isOpen = false;
+  }
+
+  /* ===============================
+     Toggle Handlers
      =============================== */
   toggleBtn.onclick = () => {
-    chatBox.classList.remove("hidden");
-    toggleBtn.style.display = "none";
-    setTimeout(() => chatInput.focus(), 200);
+    if (!isOpen) openChat();
   };
 
   closeBtn.onclick = () => {
-    chatBox.classList.add("hidden");
-    toggleBtn.style.display = "flex";
+    if (isOpen) closeChat();
   };
 
   /* ===============================
-     Message Helpers
+     Messages
      =============================== */
   function addMessage(text, sender) {
     const div = document.createElement("div");
@@ -73,17 +83,20 @@
     chatBody.scrollTop = chatBody.scrollHeight;
   }
 
+  /* ===============================
+     Typing Indicator
+     =============================== */
   function showTyping() {
-    const div = document.createElement("div");
-    div.className = "msg bot typing";
-    div.id = "typing-indicator";
-    div.innerText = "FarmFluence AI is typing...";
-    chatBody.appendChild(div);
+    const t = document.createElement("div");
+    t.id = "typing";
+    t.className = "msg bot typing";
+    t.innerText = "FarmFluence AI is typing...";
+    chatBody.appendChild(t);
     chatBody.scrollTop = chatBody.scrollHeight;
   }
 
   function hideTyping() {
-    const t = document.getElementById("typing-indicator");
+    const t = document.getElementById("typing");
     if (t) t.remove();
   }
 
@@ -107,11 +120,11 @@
 
       const data = await res.json();
       hideTyping();
-      addMessage(data.reply || "No response from server.", "bot");
+      addMessage(data.reply, "bot");
 
-    } catch (err) {
+    } catch {
       hideTyping();
-      addMessage("⚠️ Unable to reach server.", "bot");
+      addMessage("⚠️ Server not reachable.", "bot");
     }
   }
 
@@ -121,11 +134,11 @@
   });
 
   /* ===============================
-     🎙️ Voice Input (Chrome)
+     Voice (Chrome)
      =============================== */
   micBtn.onclick = () => {
     if (!("webkitSpeechRecognition" in window)) {
-      alert("Voice input works only in Chrome");
+      alert("Voice works only in Chrome");
       return;
     }
     const rec = new webkitSpeechRecognition();
@@ -138,10 +151,8 @@
   };
 
   /* ===============================
-     Welcome Message
+     Initial State
      =============================== */
-  addMessage(
-    "👋 Hi! I’m FarmFluence AI.\nHow can I help you today?",
-    "bot"
-  );
+  closeChat();
+  addMessage("👋 Hi! Ask me anything about farming.", "bot");
 })();
