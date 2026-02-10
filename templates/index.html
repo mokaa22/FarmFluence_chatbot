@@ -27,7 +27,7 @@ body {
   max-height: 620px;
   background: rgba(255,255,255,0.96);
   border-radius: 16px;
-  display: flex;
+  display: none;
   flex-direction: column;
   overflow: hidden;
   box-shadow: 0 20px 40px rgba(0,0,0,0.35);
@@ -74,8 +74,6 @@ body {
 .input {
   display: flex;
   border-top: 1px solid #ddd;
-  position: sticky;
-  bottom: 0;
   background: white;
 }
 
@@ -102,21 +100,30 @@ button {
   inset: 0;
   background: rgba(0,0,0,0.6);
   color: white;
-  display: flex;
+  display: none;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
   z-index: 999;
-  display: none;
+}
+
+#wakeup h2 {
+  margin-bottom: 8px;
+}
+
+#wakeup p {
+  font-size: 14px;
+  max-width: 320px;
 }
 
 #wakeup span {
-  font-size: 18px;
   margin-top: 12px;
+  font-size: 18px;
+  font-weight: bold;
 }
 
-/* Mobile fixes */
+/* Mobile */
 @media (max-width: 600px) {
   .chatbox {
     width: 95%;
@@ -131,18 +138,21 @@ button {
 <!-- Wake-up Screen -->
 <div id="wakeup">
   <h2>🌾 FarmFluence AI Assistant is starting</h2>
-  <p>Our servers sleep when idle to save resources.</p>
-  <span>Waking up… <b id="countdown">45</b> sec</span>
+  <p>
+    Our servers go to sleep when not in use to save resources.<br>
+    Please wait while we wake them up.
+  </p>
+  <span>Starting in <b id="countdown">45</b> seconds…</span>
 </div>
 
 <!-- Chat UI -->
-<div class="chatbox" id="chatbox" style="display:none;">
+<div class="chatbox" id="chatbox">
   <div class="header">🌾 FarmFluence AI Assistant</div>
 
   <div class="messages" id="messages">
     <div class="msg bot">
       👋 Hello! I’m your FarmFluence AI assistant.<br>
-      Ask me anything about agriculture.
+      Ask me anything about agriculture. Enter your name and location.
     </div>
   </div>
 
@@ -163,35 +173,52 @@ const chatbox = document.getElementById("chatbox");
 const wakeup = document.getElementById("wakeup");
 const countdownEl = document.getElementById("countdown");
 
-/* Check backend status */
-async function checkBackend() {
+let countdown = 45;
+let healthInterval = null;
+let countdownInterval = null;
+
+/* Show chat */
+function showChat() {
+  wakeup.style.display = "none";
+  chatbox.style.display = "flex";
+  clearInterval(healthInterval);
+  clearInterval(countdownInterval);
+}
+
+/* Health check */
+async function isBackendAlive() {
   try {
     const res = await fetch(HEALTH_URL, { cache: "no-store" });
-    if (res.ok) {
-      wakeup.style.display = "none";
-      chatbox.style.display = "flex";
-      return;
-    }
-  } catch {}
-
-  showWakeup();
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 
-/* Wake-up screen logic */
-function showWakeup() {
+/* Start wake-up UI */
+function startWakeup() {
   wakeup.style.display = "flex";
-  let time = 45;
 
-  const timer = setInterval(() => {
-    time--;
-    countdownEl.innerText = time;
-
-    if (time <= 0) {
-      clearInterval(timer);
-      location.reload();
-    }
+  countdownInterval = setInterval(() => {
+    countdown--;
+    countdownEl.innerText = countdown;
   }, 1000);
+
+  healthInterval = setInterval(async () => {
+    if (await isBackendAlive()) {
+      showChat();
+    }
+  }, 3000);
 }
+
+/* Initial load */
+(async function init() {
+  if (await isBackendAlive()) {
+    showChat();
+  } else {
+    startWakeup();
+  }
+})();
 
 /* Messages */
 function addMessage(text, sender) {
@@ -219,9 +246,8 @@ async function sendMessage() {
 
     const data = await res.json();
     addMessage(data.reply, "bot");
-
   } catch {
-    addMessage("⚠️ Unable to connect. Please wait…", "bot");
+    addMessage("⚠️ Please wait, assistant is still starting…", "bot");
   }
 }
 
@@ -239,23 +265,12 @@ function startListening() {
 
   const rec = new webkitSpeechRecognition();
   rec.lang = "en-IN";
-  rec.continuous = false;
-
   rec.onresult = e => {
     userInput.value = e.results[0][0].transcript;
     sendMessage();
   };
-
   rec.start();
 }
-
-/* Auto scroll on keyboard open */
-window.addEventListener("resize", () => {
-  messages.scrollTop = messages.scrollHeight;
-});
-
-/* Start */
-checkBackend();
 </script>
 
 </body>
