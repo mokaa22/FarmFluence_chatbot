@@ -1,277 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FarmFluence AI Assistant</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FarmFluence Dashboard</title>
 
-<style>
-body {
-  margin: 0;
-  height: 100vh;
-  font-family: "Segoe UI", sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background:
-    linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)),
-    url("/static/agri 1.jpg") no-repeat center center fixed;
-  background-size: cover;
-  background-color: #1b5e20;
-}
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", sans-serif;
+      background:
+        linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)),
+        url("/static/agri 1.jpg") no-repeat center center fixed;
+      background-size: cover;
+      background-color: #1b5e20;
+    }
 
-/* Chat Container */
-.chatbox {
-  width: 420px;
-  height: 85vh;
-  max-height: 620px;
-  background: rgba(255,255,255,0.96);
-  border-radius: 16px;
-  display: none;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.35);
-}
+    /* Optional placeholder content */
+    .page-content {
+      padding: 40px;
+      color: white;
+    }
 
-/* Header */
-.header {
-  background: linear-gradient(135deg, #2e7d32, #1b5e20);
-  color: white;
-  text-align: center;
-  padding: 14px;
-  font-weight: bold;
-}
+    h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
 
-/* Messages */
-.messages {
-  flex: 1;
-  padding: 14px;
-  overflow-y: auto;
-  background: #f6f8f9;
-  display: flex;
-  flex-direction: column;
-}
-
-.msg {
-  max-width: 85%;
-  margin-bottom: 10px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  font-size: 14px;
-}
-
-.user {
-  background: #e3f2fd;
-  align-self: flex-end;
-}
-
-.bot {
-  background: #e8f5e9;
-  align-self: flex-start;
-}
-
-/* Input */
-.input {
-  display: flex;
-  border-top: 1px solid #ddd;
-  background: white;
-}
-
-input {
-  flex: 1;
-  border: none;
-  padding: 12px;
-  outline: none;
-  font-size: 14px;
-}
-
-button {
-  border: none;
-  padding: 12px 14px;
-  background: #2e7d32;
-  color: white;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-/* Wake-up overlay */
-#wakeup {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  color: white;
-  display: none;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  z-index: 999;
-}
-
-#wakeup h2 {
-  margin-bottom: 8px;
-}
-
-#wakeup p {
-  font-size: 14px;
-  max-width: 320px;
-}
-
-#wakeup span {
-  margin-top: 12px;
-  font-size: 18px;
-  font-weight: bold;
-}
-
-/* Mobile */
-@media (max-width: 600px) {
-  .chatbox {
-    width: 95%;
-    height: 90vh;
-  }
-}
-</style>
+    p {
+      max-width: 600px;
+      line-height: 1.6;
+    }
+  </style>
 </head>
 
 <body>
 
-<!-- Wake-up Screen -->
-<div id="wakeup">
-  <h2>🌾 FarmFluence AI Assistant is starting</h2>
-  <p>
-    Our servers go to sleep when not in use to save resources.<br>
-    Please wait while we wake them up.
-  </p>
-  <span>Starting in <b id="countdown">45</b> seconds…</span>
-</div>
-
-<!-- Chat UI -->
-<div class="chatbox" id="chatbox">
-  <div class="header">🌾 FarmFluence AI Assistant</div>
-
-  <div class="messages" id="messages">
-    <div class="msg bot">
-      👋 Hello! I’m your FarmFluence AI assistant.<br>
-      Ask me anything about agriculture. Enter your name and location.
-    </div>
+  <!-- Optional page content (dashboard / landing) -->
+  <div class="page-content">
+    <h1>🌾 FarmFluence Dashboard</h1>
+    <p>
+      Welcome to FarmFluence.  
+      Use the chatbot in the bottom-right corner to get instant
+      AI-powered farming guidance.
+    </p>
   </div>
 
-  <div class="input">
-    <input id="userInput" placeholder="Type or speak your question..." />
-    <button onclick="startListening()">🎙️</button>
-    <button onclick="sendMessage()">➤</button>
-  </div>
-</div>
-
-<script>
-const API_URL = "/chat";
-const HEALTH_URL = "/health";
-
-const messages = document.getElementById("messages");
-const userInput = document.getElementById("userInput");
-const chatbox = document.getElementById("chatbox");
-const wakeup = document.getElementById("wakeup");
-const countdownEl = document.getElementById("countdown");
-
-let countdown = 45;
-let healthInterval = null;
-let countdownInterval = null;
-
-/* Show chat */
-function showChat() {
-  wakeup.style.display = "none";
-  chatbox.style.display = "flex";
-  clearInterval(healthInterval);
-  clearInterval(countdownInterval);
-}
-
-/* Health check */
-async function isBackendAlive() {
-  try {
-    const res = await fetch(HEALTH_URL, { cache: "no-store" });
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
-
-/* Start wake-up UI */
-function startWakeup() {
-  wakeup.style.display = "flex";
-
-  countdownInterval = setInterval(() => {
-    countdown--;
-    countdownEl.innerText = countdown;
-  }, 1000);
-
-  healthInterval = setInterval(async () => {
-    if (await isBackendAlive()) {
-      showChat();
-    }
-  }, 3000);
-}
-
-/* Initial load */
-(async function init() {
-  if (await isBackendAlive()) {
-    showChat();
-  } else {
-    startWakeup();
-  }
-})();
-
-/* Messages */
-function addMessage(text, sender) {
-  const div = document.createElement("div");
-  div.className = "msg " + sender;
-  div.innerText = text;
-  messages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
-}
-
-/* Send message */
-async function sendMessage() {
-  const text = userInput.value.trim();
-  if (!text) return;
-
-  addMessage(text, "user");
-  userInput.value = "";
-
-  try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text })
-    });
-
-    const data = await res.json();
-    addMessage(data.reply, "bot");
-  } catch {
-    addMessage("⚠️ Please wait, assistant is still starting…", "bot");
-  }
-}
-
-/* Enter key */
-userInput.addEventListener("keydown", e => {
-  if (e.key === "Enter") sendMessage();
-});
-
-/* Voice INPUT only */
-function startListening() {
-  if (!("webkitSpeechRecognition" in window)) {
-    alert("Voice input works only in Chrome");
-    return;
-  }
-
-  const rec = new webkitSpeechRecognition();
-  rec.lang = "en-IN";
-  rec.onresult = e => {
-    userInput.value = e.results[0][0].transcript;
-    sendMessage();
-  };
-  rec.start();
-}
-</script>
+  <!-- ===============================
+       FarmFluence Chatbot Widget
+       =============================== -->
+  <script>
+    (function () {
+      var s = document.createElement("script");
+      s.src = "/static/widget/chatbot.js";
+      s.async = true;
+      document.body.appendChild(s);
+    })();
+  </script>
 
 </body>
 </html>
