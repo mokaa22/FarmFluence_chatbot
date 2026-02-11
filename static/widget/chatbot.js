@@ -94,17 +94,14 @@
   /* ===============================
      Hover Tooltip Logic
      =============================== */
-  toggleBtn.addEventListener("mouseenter", () => {
-    if (!isOpen) {
-      welcomeBubble.style.display = "block";
-    }
-  });
+ let bubbleShown = false;
 
-  toggleBtn.addEventListener("mouseleave", () => {
-    if (!isOpen) {
-      welcomeBubble.style.display = "none";
-    }
-  });
+toggleBtn.addEventListener("mouseenter", () => {
+  if (!isOpen && !bubbleShown) {
+    welcomeBubble.style.display = "block";
+    bubbleShown = true;  // show only once
+  }
+});
 
 
   /* ===============================
