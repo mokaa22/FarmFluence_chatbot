@@ -36,14 +36,15 @@
 
 
   /* ===============================
-     Welcome Bubble (Always Visible Initially)
+     Welcome Bubble
      =============================== */
   const welcomeBubble = document.createElement("div");
   welcomeBubble.id = "chat-welcome-bubble";
   welcomeBubble.innerText =
     "👋 Hello! I am your AI Assistant. How can I help you today?";
-  welcomeBubble.style.display = "block"; // visible on page load
   widget.appendChild(welcomeBubble);
+
+  welcomeBubble.style.display = "block"; // show on page load
 
 
   /* ===============================
@@ -66,7 +67,7 @@
   function openChat() {
     chatBox.style.display = "flex";
     toggleBtn.style.display = "none";
-    welcomeBubble.style.display = "none"; // hide bubble when open
+    welcomeBubble.style.display = "none"; // hide bubble
     isOpen = true;
     setTimeout(() => chatInput.focus(), 150);
   }
@@ -74,8 +75,8 @@
   function closeChat() {
     chatBox.style.display = "none";
     toggleBtn.style.display = "flex";
-    welcomeBubble.style.display = "block"; // show bubble again
     isOpen = false;
+    // DO NOT auto show bubble here
   }
 
   toggleBtn.onclick = () => {
@@ -85,6 +86,22 @@
   closeBtn.onclick = () => {
     if (isOpen) closeChat();
   };
+
+
+  /* ===============================
+     Hover Logic (Reappear After Close)
+     =============================== */
+  toggleBtn.addEventListener("mouseenter", () => {
+    if (!isOpen) {
+      welcomeBubble.style.display = "block";
+    }
+  });
+
+  toggleBtn.addEventListener("mouseleave", () => {
+    if (!isOpen) {
+      welcomeBubble.style.display = "none";
+    }
+  });
 
 
   /* ===============================
@@ -99,9 +116,6 @@
   }
 
 
-  /* ===============================
-     Typing Indicator
-     =============================== */
   function showTyping() {
     const t = document.createElement("div");
     t.id = "typing";
@@ -117,9 +131,6 @@
   }
 
 
-  /* ===============================
-     Send Message
-     =============================== */
   async function sendMessage() {
     const text = chatInput.value.trim();
     if (!text) return;
@@ -151,9 +162,6 @@
   });
 
 
-  /* ===============================
-     Voice (Chrome)
-     =============================== */
   micBtn.onclick = () => {
     if (!("webkitSpeechRecognition" in window)) {
       alert("Voice works only in Chrome");
@@ -169,9 +177,6 @@
   };
 
 
-  /* ===============================
-     Initial State
-     =============================== */
   closeChat();
 
   addMessage(
