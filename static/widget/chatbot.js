@@ -1,4 +1,5 @@
 (function () {
+
   /* ===============================
      Load CSS
      =============================== */
@@ -33,6 +34,17 @@
   `;
   document.body.appendChild(widget);
 
+
+  /* ===============================
+     Create Welcome Tooltip
+     =============================== */
+  const welcomeBubble = document.createElement("div");
+  welcomeBubble.id = "chat-welcome-bubble";
+  welcomeBubble.innerText =
+    "👋 Hello! I am your AI Assistant. How can I help you today?";
+  widget.appendChild(welcomeBubble);
+
+
   /* ===============================
      Elements
      =============================== */
@@ -44,14 +56,17 @@
   const sendBtn = document.getElementById("chat-send");
   const micBtn = document.getElementById("chat-mic");
 
+
   /* ===============================
-     STATE (single source of truth)
+     STATE
      =============================== */
   let isOpen = false;
+
 
   function openChat() {
     chatBox.style.display = "flex";
     toggleBtn.style.display = "none";
+    welcomeBubble.style.display = "none";
     isOpen = true;
     setTimeout(() => chatInput.focus(), 150);
   }
@@ -61,6 +76,7 @@
     toggleBtn.style.display = "flex";
     isOpen = false;
   }
+
 
   /* ===============================
      Toggle Handlers
@@ -73,6 +89,7 @@
     if (isOpen) closeChat();
   };
 
+
   /* ===============================
      Messages
      =============================== */
@@ -83,6 +100,7 @@
     chatBody.appendChild(div);
     chatBody.scrollTop = chatBody.scrollHeight;
   }
+
 
   /* ===============================
      Typing Indicator
@@ -100,6 +118,7 @@
     const t = document.getElementById("typing");
     if (t) t.remove();
   }
+
 
   /* ===============================
      Send Message
@@ -134,6 +153,7 @@
     if (e.key === "Enter") sendMessage();
   });
 
+
   /* ===============================
      Voice (Chrome)
      =============================== */
@@ -151,9 +171,27 @@
     rec.start();
   };
 
+
   /* ===============================
      Initial State
      =============================== */
   closeChat();
-  addMessage("👋 Hi! Ask me anything about farming.Please enter your name & location.", "bot");
+
+  addMessage(
+    "👋 Hi! Ask me anything about farming. Please enter your name & location.",
+    "bot"
+  );
+
+
+  /* ===============================
+     Auto Show Welcome Tooltip
+     =============================== */
+  setTimeout(() => {
+    welcomeBubble.style.opacity = "1";
+  }, 800);
+
+  setTimeout(() => {
+    welcomeBubble.style.opacity = "0";
+  }, 6000);
+
 })();
