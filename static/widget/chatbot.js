@@ -36,13 +36,13 @@
 
 
   /* ===============================
-     Create Welcome Tooltip (Hover Only)
+     Welcome Bubble (Always Visible Initially)
      =============================== */
   const welcomeBubble = document.createElement("div");
   welcomeBubble.id = "chat-welcome-bubble";
   welcomeBubble.innerText =
     "👋 Hello! I am your AI Assistant. How can I help you today?";
-  welcomeBubble.style.display = "none"; // hidden by default
+  welcomeBubble.style.display = "block"; // visible on page load
   widget.appendChild(welcomeBubble);
 
 
@@ -57,17 +57,16 @@
   const sendBtn = document.getElementById("chat-send");
   const micBtn = document.getElementById("chat-mic");
 
-
-  /* ===============================
-     STATE
-     =============================== */
   let isOpen = false;
 
 
+  /* ===============================
+     Open / Close Logic
+     =============================== */
   function openChat() {
     chatBox.style.display = "flex";
     toggleBtn.style.display = "none";
-    welcomeBubble.style.display = "none"; // hide tooltip when chat opens
+    welcomeBubble.style.display = "none"; // hide bubble when open
     isOpen = true;
     setTimeout(() => chatInput.focus(), 150);
   }
@@ -75,13 +74,10 @@
   function closeChat() {
     chatBox.style.display = "none";
     toggleBtn.style.display = "flex";
+    welcomeBubble.style.display = "block"; // show bubble again
     isOpen = false;
   }
 
-
-  /* ===============================
-     Toggle Handlers
-     =============================== */
   toggleBtn.onclick = () => {
     if (!isOpen) openChat();
   };
@@ -89,19 +85,6 @@
   closeBtn.onclick = () => {
     if (isOpen) closeChat();
   };
-
-
-  /* ===============================
-     Hover Tooltip Logic
-     =============================== */
- let bubbleShown = false;
-
-toggleBtn.addEventListener("mouseenter", () => {
-  if (!isOpen && !bubbleShown) {
-    welcomeBubble.style.display = "block";
-    bubbleShown = true;  // show only once
-  }
-});
 
 
   /* ===============================
