@@ -36,12 +36,13 @@
 
 
   /* ===============================
-     Create Welcome Tooltip (Persistent)
+     Create Welcome Tooltip (Hover Only)
      =============================== */
   const welcomeBubble = document.createElement("div");
   welcomeBubble.id = "chat-welcome-bubble";
   welcomeBubble.innerText =
     "👋 Hello! I am your AI Assistant. How can I help you today?";
+  welcomeBubble.style.display = "none"; // hidden by default
   widget.appendChild(welcomeBubble);
 
 
@@ -66,7 +67,7 @@
   function openChat() {
     chatBox.style.display = "flex";
     toggleBtn.style.display = "none";
-    welcomeBubble.style.display = "none"; // hide bubble when opened
+    welcomeBubble.style.display = "none"; // hide tooltip when chat opens
     isOpen = true;
     setTimeout(() => chatInput.focus(), 150);
   }
@@ -74,7 +75,6 @@
   function closeChat() {
     chatBox.style.display = "none";
     toggleBtn.style.display = "flex";
-    welcomeBubble.style.display = "block"; // show bubble again
     isOpen = false;
   }
 
@@ -89,6 +89,22 @@
   closeBtn.onclick = () => {
     if (isOpen) closeChat();
   };
+
+
+  /* ===============================
+     Hover Tooltip Logic
+     =============================== */
+  toggleBtn.addEventListener("mouseenter", () => {
+    if (!isOpen) {
+      welcomeBubble.style.display = "block";
+    }
+  });
+
+  toggleBtn.addEventListener("mouseleave", () => {
+    if (!isOpen) {
+      welcomeBubble.style.display = "none";
+    }
+  });
 
 
   /* ===============================
