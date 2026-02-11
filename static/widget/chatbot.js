@@ -36,7 +36,7 @@
 
 
   /* ===============================
-     Create Welcome Tooltip
+     Create Welcome Tooltip (Persistent)
      =============================== */
   const welcomeBubble = document.createElement("div");
   welcomeBubble.id = "chat-welcome-bubble";
@@ -66,7 +66,7 @@
   function openChat() {
     chatBox.style.display = "flex";
     toggleBtn.style.display = "none";
-    welcomeBubble.style.display = "none";
+    welcomeBubble.style.display = "none"; // hide bubble when opened
     isOpen = true;
     setTimeout(() => chatInput.focus(), 150);
   }
@@ -74,6 +74,7 @@
   function closeChat() {
     chatBox.style.display = "none";
     toggleBtn.style.display = "flex";
+    welcomeBubble.style.display = "block"; // show bubble again
     isOpen = false;
   }
 
@@ -181,17 +182,5 @@
     "👋 Hi! Ask me anything about farming. Please enter your name & location.",
     "bot"
   );
-
-
-  /* ===============================
-     Auto Show Welcome Tooltip
-     =============================== */
-  setTimeout(() => {
-    welcomeBubble.style.opacity = "1";
-  }, 800);
-
-  setTimeout(() => {
-    welcomeBubble.style.opacity = "0";
-  }, 6000);
 
 })();
