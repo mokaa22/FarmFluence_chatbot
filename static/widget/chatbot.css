@@ -161,28 +161,29 @@
 
 
 /* ==========================================
-   Welcome Tooltip Bubble
+   Welcome Tooltip Bubble (Single Line)
    ========================================== */
 #farm-chatbot-widget #chat-welcome-bubble {
   position: absolute;
-  bottom: 80px;
-  right: 70px;
+  bottom: 85px;
+  right: 20px;
   background: #2e7d32;
   color: white;
-  padding: 10px 14px;
-  border-radius: 10px;
-  font-size: 13px;
-  max-width: 260px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+  padding: 12px 20px;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;              /* Force single line */
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  opacity: 1;
 }
 
+/* Pointer */
 #farm-chatbot-widget #chat-welcome-bubble::after {
   content: "";
   position: absolute;
   bottom: -6px;
-  right: 14px;
+  right: 30px;
   border-width: 6px;
   border-style: solid;
   border-color: #2e7d32 transparent transparent transparent;
@@ -193,6 +194,7 @@
    Mobile Responsive
    ========================================== */
 @media (max-width: 600px) {
+
   #farm-chatbot-widget #chat-box {
     width: calc(100vw - 20px) !important;
     height: calc(100vh - 110px) !important;
@@ -200,7 +202,7 @@
   }
 
   #farm-chatbot-widget #chat-welcome-bubble {
-    right: 20px;
-    max-width: 200px;
+    white-space: normal;   /* allow wrapping on mobile */
+    max-width: 220px;
   }
 }
