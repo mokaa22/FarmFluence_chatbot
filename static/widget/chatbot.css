@@ -14,18 +14,19 @@
    Floating Toggle Button
    =============================== */
 #farm-chatbot-widget #chat-toggle {
-  background: #2e7d32;
-  color: white;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: #2e7d32 !important;
+  color: white !important;
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   cursor: pointer;
-  font-size: 24px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+  font-size: 24px !important;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35) !important;
   transition: transform 0.2s ease;
+  border: none !important;
 }
 
 #farm-chatbot-widget #chat-toggle:hover {
@@ -37,11 +38,11 @@
    =============================== */
 #farm-chatbot-widget #chat-box {
   display: none;
-  width: 340px;
-  height: 460px;
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+  width: 340px !important;
+  height: 460px !important;
+  background: #ffffff !important;
+  border-radius: 16px !important;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.35) !important;
   flex-direction: column;
   position: absolute;
   bottom: 72px;
@@ -53,19 +54,19 @@
    Header
    =============================== */
 #farm-chatbot-widget #chat-header {
-  background: #2e7d32;
-  color: white;
-  padding: 10px 12px;
-  font-size: 14px;
-  font-weight: 600;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  background: #2e7d32 !important;
+  color: white !important;
+  padding: 10px 12px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
 }
 
 #farm-chatbot-widget #chat-close {
   cursor: pointer;
-  font-size: 14px;
+  font-size: 14px !important;
 }
 
 /* ===============================
@@ -73,12 +74,12 @@
    =============================== */
 #farm-chatbot-widget #chat-body {
   flex: 1;
-  padding: 14px 12px;
-  overflow-y: auto;
-  background: #f7f9fa;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  padding: 14px 12px !important;
+  overflow-y: auto !important;
+  background: #f7f9fa !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
   scroll-behavior: smooth;
 }
 
@@ -87,24 +88,24 @@
    =============================== */
 #farm-chatbot-widget .msg {
   max-width: 78%;
-  padding: 10px 12px;
-  border-radius: 14px;
-  font-size: 13.5px;
-  line-height: 1.45;
+  padding: 10px 12px !important;
+  border-radius: 14px !important;
+  font-size: 13.5px !important;
+  line-height: 1.45 !important;
   word-wrap: break-word;
 }
 
 #farm-chatbot-widget .msg.user {
   align-self: flex-end;
-  background: #dcf8c6;
-  border-bottom-right-radius: 4px;
+  background: #dcf8c6 !important;
+  border-bottom-right-radius: 4px !important;
 }
 
 #farm-chatbot-widget .msg.bot {
   align-self: flex-start;
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
-  border-bottom-left-radius: 4px;
+  background: #ffffff !important;
+  border: 1px solid #e0e0e0 !important;
+  border-bottom-left-radius: 4px !important;
 }
 
 #farm-chatbot-widget .msg.typing {
@@ -116,32 +117,42 @@
    Footer / Input
    =============================== */
 #farm-chatbot-widget #chat-footer {
-  padding: 8px;
-  display: flex;
-  gap: 6px;
-  border-top: 1px solid #e6e6e6;
-  background: #ffffff;
+  padding: 8px !important;
+  display: flex !important;
+  gap: 6px !important;
+  border-top: 1px solid #e6e6e6 !important;
+  background: #ffffff !important;
 }
 
-#farm-chatbot-widget #chat-input {
-  flex: 1;
-  border: 1px solid #ddd;
-  border-radius: 18px;
-  padding: 8px 12px;
-  font-size: 13px;
-  outline: none;
+/* INPUT FIX */
+#farm-chatbot-widget #chat-footer #chat-input {
+  flex: 1 !important;
+  border: 1px solid #ddd !important;
+  border-radius: 18px !important;
+  padding: 8px 12px !important;
+  font-size: 13px !important;
+  outline: none !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
 }
 
-#farm-chatbot-widget #chat-send,
-#farm-chatbot-widget #chat-mic {
-  border: none;
-  background: #2e7d32;
-  color: white;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 16px;
+/* SEND + MIC FIX */
+#farm-chatbot-widget #chat-footer #chat-send,
+#farm-chatbot-widget #chat-footer #chat-mic {
+  border: none !important;
+  background: #2e7d32 !important;
+  color: white !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  cursor: pointer !important;
+  font-size: 16px !important;
+  outline: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 /* ===============================
@@ -149,8 +160,8 @@
    =============================== */
 @media (max-width: 600px) {
   #farm-chatbot-widget #chat-box {
-    width: calc(100vw - 20px);
-    height: calc(100vh - 110px);
+    width: calc(100vw - 20px) !important;
+    height: calc(100vh - 110px) !important;
     right: 0;
   }
 }
