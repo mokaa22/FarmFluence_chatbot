@@ -44,7 +44,7 @@
     "👋 Hello! I am your AI Assistant. How can I help you today?";
   widget.appendChild(welcomeBubble);
 
-  welcomeBubble.style.display = "block"; // show on page load
+  welcomeBubble.style.display = "block";
 
 
   /* ===============================
@@ -67,7 +67,7 @@
   function openChat() {
     chatBox.style.display = "flex";
     toggleBtn.style.display = "none";
-    welcomeBubble.style.display = "none"; // hide bubble
+    welcomeBubble.style.display = "none";
     isOpen = true;
     setTimeout(() => chatInput.focus(), 150);
   }
@@ -76,11 +76,15 @@
     chatBox.style.display = "none";
     toggleBtn.style.display = "flex";
     isOpen = false;
-    // DO NOT auto show bubble here
   }
 
+  // ✅ TOGGLE FIX (MAIN CHANGE)
   toggleBtn.onclick = () => {
-    if (!isOpen) openChat();
+    if (isOpen) {
+      closeChat();
+    } else {
+      openChat();
+    }
   };
 
   closeBtn.onclick = () => {
@@ -89,7 +93,21 @@
 
 
   /* ===============================
-     Hover Logic (Reappear After Close)
+     Click Outside to Close (Optional UX)
+     =============================== */
+  document.addEventListener("click", (e) => {
+    if (
+      isOpen &&
+      !chatBox.contains(e.target) &&
+      !toggleBtn.contains(e.target)
+    ) {
+      closeChat();
+    }
+  });
+
+
+  /* ===============================
+     Hover Logic
      =============================== */
   toggleBtn.addEventListener("mouseenter", () => {
     if (!isOpen) {
@@ -115,7 +133,6 @@
     chatBody.scrollTop = chatBody.scrollHeight;
   }
 
-
   function showTyping() {
     const t = document.createElement("div");
     t.id = "typing";
@@ -131,6 +148,9 @@
   }
 
 
+  /* ===============================
+     Send Message
+     =============================== */
   async function sendMessage() {
     const text = chatInput.value.trim();
     if (!text) return;
@@ -157,26 +177,36 @@
   }
 
   sendBtn.onclick = sendMessage;
+
   chatInput.addEventListener("keydown", e => {
     if (e.key === "Enter") sendMessage();
   });
 
 
+  /* ===============================
+     Voice Input
+     =============================== */
   micBtn.onclick = () => {
     if (!("webkitSpeechRecognition" in window)) {
       alert("Voice works only in Chrome");
       return;
     }
+
     const rec = new webkitSpeechRecognition();
     rec.lang = "en-IN";
+
     rec.onresult = e => {
       chatInput.value = e.results[0][0].transcript;
       sendMessage();
     };
+
     rec.start();
   };
 
 
+  /* ===============================
+     Init
+     =============================== */
   closeChat();
 
   addMessage(
