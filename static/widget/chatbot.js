@@ -5,15 +5,15 @@
      =============================== */
   const css = document.createElement("link");
   css.rel = "stylesheet";
-  css.href = "https://ai.farmfluence.online/static/widget/chatbot.css";
+  css.href = "/static/widget/chatbot.css";
   document.head.appendChild(css);
-
 
   /* ===============================
      Create Widget
      =============================== */
   const widget = document.createElement("div");
   widget.id = "farm-chatbot-widget";
+
   widget.innerHTML = `
     <div id="chat-toggle">🌱</div>
 
@@ -32,8 +32,8 @@
       </div>
     </div>
   `;
-  document.body.appendChild(widget);
 
+  document.body.appendChild(widget);
 
   /* ===============================
      Welcome Bubble
@@ -42,10 +42,9 @@
   welcomeBubble.id = "chat-welcome-bubble";
   welcomeBubble.innerText =
     "👋 Hello! I am your AI Assistant. How can I help you today?";
+
   widget.appendChild(welcomeBubble);
-
   welcomeBubble.style.display = "block";
-
 
   /* ===============================
      Elements
@@ -60,7 +59,6 @@
 
   let isOpen = false;
 
-
   /* ===============================
      Open / Close Logic
      =============================== */
@@ -69,7 +67,10 @@
     toggleBtn.style.display = "none";
     welcomeBubble.style.display = "none";
     isOpen = true;
-    setTimeout(() => chatInput.focus(), 150);
+
+    setTimeout(() => {
+      chatInput.focus();
+    }, 150);
   }
 
   function closeChat() {
@@ -78,7 +79,6 @@
     isOpen = false;
   }
 
-  // ✅ TOGGLE FIX (MAIN CHANGE)
   toggleBtn.onclick = () => {
     if (isOpen) {
       closeChat();
@@ -87,13 +87,10 @@
     }
   };
 
-  closeBtn.onclick = () => {
-    if (isOpen) closeChat();
-  };
-
+  closeBtn.onclick = closeChat;
 
   /* ===============================
-     Click Outside to Close (Optional UX)
+     Click Outside to Close
      =============================== */
   document.addEventListener("click", (e) => {
     if (
@@ -105,9 +102,8 @@
     }
   });
 
-
   /* ===============================
-     Hover Logic
+     Hover Bubble
      =============================== */
   toggleBtn.addEventListener("mouseenter", () => {
     if (!isOpen) {
@@ -121,7 +117,6 @@
     }
   });
 
-
   /* ===============================
      Messages
      =============================== */
@@ -129,73 +124,99 @@
     const div = document.createElement("div");
     div.className = `msg ${sender}`;
     div.innerText = text;
+
     chatBody.appendChild(div);
     chatBody.scrollTop = chatBody.scrollHeight;
   }
 
   function showTyping() {
-    const t = document.createElement("div");
-    t.id = "typing";
-    t.className = "msg bot typing";
-    t.innerText = "FarmFluence AI is typing...";
-    chatBody.appendChild(t);
+    const typing = document.createElement("div");
+    typing.id = "typing";
+    typing.className = "msg bot typing";
+    typing.innerText = "FarmFluence AI is typing...";
+
+    chatBody.appendChild(typing);
     chatBody.scrollTop = chatBody.scrollHeight;
   }
 
   function hideTyping() {
-    const t = document.getElementById("typing");
-    if (t) t.remove();
+    const typing = document.getElementById("typing");
+    if (typing) typing.remove();
   }
-
 
   /* ===============================
      Send Message
      =============================== */
   async function sendMessage() {
     const text = chatInput.value.trim();
+
     if (!text) return;
 
     addMessage(text, "user");
     chatInput.value = "";
+
     showTyping();
 
     try {
-      const res = await fetch("https://ai.farmfluence.online/chat", {
+      const response = await fetch("/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text })
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          message: text
+        })
       });
 
-      const data = await res.json();
-      hideTyping();
-      addMessage(data.reply, "bot");
+      if (!response.ok) {
+        throw new Error("Request failed");
+      }
 
-    } catch {
+      const data = await response.json();
+
       hideTyping();
-      addMessage("⚠️ Server not reachable.", "bot");
+
+      addMessage(
+        data.reply || "⚠️ No response received.",
+        "bot"
+      );
+
+    } catch (error) {
+      console.error(error);
+
+      hideTyping();
+
+      addMessage(
+        "⚠️ FarmFluence AI is currently unavailable. Please try again in a few moments.",
+        "bot"
+      );
     }
   }
 
   sendBtn.onclick = sendMessage;
 
-  chatInput.addEventListener("keydown", e => {
-    if (e.key === "Enter") sendMessage();
+  chatInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      sendMessage();
+    }
   });
-
 
   /* ===============================
      Voice Input
      =============================== */
   micBtn.onclick = () => {
+
     if (!("webkitSpeechRecognition" in window)) {
-      alert("Voice works only in Chrome");
+      alert("Voice input works only in Chrome.");
       return;
     }
 
     const rec = new webkitSpeechRecognition();
-    rec.lang = "en-IN";
 
-    rec.onresult = e => {
+    rec.lang = "en-IN";
+    rec.continuous = false;
+
+    rec.onresult = (e) => {
       chatInput.value = e.results[0][0].transcript;
       sendMessage();
     };
@@ -203,14 +224,13 @@
     rec.start();
   };
 
-
   /* ===============================
      Init
      =============================== */
   closeChat();
 
   addMessage(
-    "👋 Hi! Ask me anything about farming. Please enter your name & location.",
+    "👋 Welcome to FarmFluence AI. Please enter your name and location, then ask any agriculture-related question.",
     "bot"
   );
 
