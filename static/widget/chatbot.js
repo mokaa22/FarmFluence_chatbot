@@ -1,11 +1,16 @@
 (function () {
 
+  /* Prevent duplicate loading */
+  if (document.getElementById("farm-chatbot-widget")) {
+    return;
+  }
+
   /* ===============================
      Load CSS
      =============================== */
   const css = document.createElement("link");
   css.rel = "stylesheet";
-  css.href = "/static/widget/chatbot.css";
+  css.href = "https://ai.farmfluence.in/static/widget/chatbot.css";
   document.head.appendChild(css);
 
   /* ===============================
@@ -158,18 +163,22 @@
     showTyping();
 
     try {
-      const response = await fetch("/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          message: text
-        })
-      });
+      const response = await fetch(
+        "https://ai.farmfluence.in/chat",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          mode: "cors",
+          body: JSON.stringify({
+            message: text
+          })
+        }
+      );
 
       if (!response.ok) {
-        throw new Error("Request failed");
+        throw new Error(`HTTP ${response.status}`);
       }
 
       const data = await response.json();
@@ -182,7 +191,7 @@
       );
 
     } catch (error) {
-      console.error(error);
+      console.error("FarmFluence Error:", error);
 
       hideTyping();
 
@@ -215,6 +224,7 @@
 
     rec.lang = "en-IN";
     rec.continuous = false;
+    rec.interimResults = false;
 
     rec.onresult = (e) => {
       chatInput.value = e.results[0][0].transcript;
