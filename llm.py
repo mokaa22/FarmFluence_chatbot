@@ -11,7 +11,7 @@ client = Groq(api_key=GROQ_API_KEY)
 
 def ask_llm(messages):
     response = client.chat.completions.create(
-        model="qwen/qwen3-32b",
+        model="qwen/qwen3.6-27b",
         messages=messages,
         temperature=0.5,
         max_tokens=4096
