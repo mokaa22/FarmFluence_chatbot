@@ -11,11 +11,11 @@ client = Groq(api_key=GROQ_API_KEY)
 
 def ask_llm(messages):
     response = client.chat.completions.create(
-        model="qwen/qwen3.6-27b",
+        model="openai/gpt-oss-20b",
         messages=messages,
-        temperature=0.7,
+        temperature=0.6,
         max_completion_tokens=4096,
-        reasoning_effort="none"
+        include_reasoning=False
     )
 
     return response.choices[0].message.content
