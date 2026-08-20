@@ -8,18 +8,12 @@ if not GROQ_API_KEY:
 
 client = Groq(api_key=GROQ_API_KEY)
 
-
 def ask_llm(messages):
-    try:
-        response = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
-            messages=messages,
-            temperature=0.5,
-            max_tokens=1024
-        )
+    response = client.chat.completions.create(
+        model="llama-3.1-8b-instant",
+        messages=messages,
+        temperature=0.5,
+        max_tokens=1024
+    )
 
-        return response.choices[0].message.content
-
-    except Exception as e:
-        print("❌ GROQ ERROR:", repr(e))
-        raise
+    return response.choices[0].message.content
