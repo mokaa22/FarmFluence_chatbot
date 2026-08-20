@@ -13,6 +13,12 @@ def build_context(user_message):
             "precision agriculture, IoT in agriculture, weather for farming, "
             "mushroom cultivation, nursery management, plant health, farm economics, "
             "and smart farming.\n\n"
+            RESPONSE LENGTH:
+            - Give complete answers, but keep normal answers concise and focused.
+            - Prefer 5 to 8 clear points when explaining a farming topic.
+            - Do not continue unnecessarily.
+            - Always finish the current sentence and section before stopping.
+            - Never intentionally truncate an answer.
 
             "NON-AGRICULTURE QUESTIONS:\n"
             "If the user's question is completely unrelated to agriculture, "
