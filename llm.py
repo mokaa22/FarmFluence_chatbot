@@ -13,6 +13,11 @@ def ask_llm(messages):
     response = client.chat.completions.create(
         model="qwen/qwen3.6-27b",
         messages=messages,
+
+        # Disable visible reasoning for normal chatbot conversations
+        reasoning_effort="none",
+        reasoning_format="hidden",
+
         temperature=0.7,
         max_tokens=1024
     )
