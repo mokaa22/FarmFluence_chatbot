@@ -13,8 +13,9 @@ def ask_llm(messages):
     response = client.chat.completions.create(
         model="qwen/qwen3.6-27b",
         messages=messages,
-        temperature=0.5,
-        max_tokens=4096
+        temperature=0.7,
+        max_completion_tokens=4096,
+        reasoning_effort="none"
     )
 
     return response.choices[0].message.content
