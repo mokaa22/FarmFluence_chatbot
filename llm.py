@@ -14,7 +14,7 @@ def ask_llm(messages):
         model="openai/gpt-oss-20b",
         messages=messages,
         temperature=0.6,
-        max_completion_tokens=4096,
+        max_completion_tokens=8192,
         include_reasoning=False
     )
 
