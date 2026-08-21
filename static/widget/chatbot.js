@@ -65,8 +65,23 @@
   let isOpen = false;
 
   /* ===============================
+     CONVERSATION MEMORY
+     =============================== */
+
+  const CONVERSATION_KEY = "farmfluence_conversation_id";
+
+  let conversationId =
+    sessionStorage.getItem(CONVERSATION_KEY) || null;
+
+  console.log(
+    "FarmFluence Conversation ID:",
+    conversationId
+  );
+
+  /* ===============================
      Open / Close Logic
      =============================== */
+
   function openChat() {
     chatBox.style.display = "flex";
     toggleBtn.style.display = "none";
@@ -97,6 +112,7 @@
   /* ===============================
      Click Outside to Close
      =============================== */
+
   document.addEventListener("click", (e) => {
     if (
       isOpen &&
@@ -110,6 +126,7 @@
   /* ===============================
      Hover Bubble
      =============================== */
+
   toggleBtn.addEventListener("mouseenter", () => {
     if (!isOpen) {
       welcomeBubble.style.display = "block";
@@ -125,8 +142,10 @@
   /* ===============================
      Messages
      =============================== */
+
   function addMessage(text, sender) {
     const div = document.createElement("div");
+
     div.className = `msg ${sender}`;
     div.innerText = text;
 
@@ -136,6 +155,7 @@
 
   function showTyping() {
     const typing = document.createElement("div");
+
     typing.id = "typing";
     typing.className = "msg bot typing";
     typing.innerText = "FarmFluence AI is typing...";
@@ -146,52 +166,135 @@
 
   function hideTyping() {
     const typing = document.getElementById("typing");
-    if (typing) typing.remove();
+
+    if (typing) {
+      typing.remove();
+    }
   }
 
   /* ===============================
-     Send Message
+     SEND MESSAGE
      =============================== */
+
   async function sendMessage() {
+
     const text = chatInput.value.trim();
 
-    if (!text) return;
+    if (!text) {
+      return;
+    }
 
     addMessage(text, "user");
+
     chatInput.value = "";
 
     showTyping();
 
     try {
+
+      /* ===============================
+         Prepare Request
+         =============================== */
+
+      const requestBody = {
+        message: text
+      };
+
+      /*
+       * If we already have a conversation ID,
+       * send it to the backend.
+       *
+       * First message does not have one.
+       * Backend will create one and return it.
+       */
+
+      if (conversationId) {
+        requestBody.conversation_id = conversationId;
+      }
+
+      console.log(
+        "Sending FarmFluence message:",
+        requestBody
+      );
+
+      /* ===============================
+         API REQUEST
+         =============================== */
+
       const response = await fetch(
         "https://ai.farmfluence.in/chat",
         {
           method: "POST",
+
           headers: {
             "Content-Type": "application/json"
           },
+
           mode: "cors",
-          body: JSON.stringify({
-            message: text
-          })
+
+          body: JSON.stringify(requestBody)
         }
       );
 
+      /* ===============================
+         HTTP ERROR
+         =============================== */
+
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        throw new Error(
+          `HTTP ${response.status}`
+        );
       }
 
+      /* ===============================
+         READ RESPONSE
+         =============================== */
+
       const data = await response.json();
+
+      console.log(
+        "FarmFluence response:",
+        data
+      );
+
+      /* ===============================
+         SAVE CONVERSATION ID
+         =============================== */
+
+      if (data.conversation_id) {
+
+        conversationId =
+          data.conversation_id;
+
+        sessionStorage.setItem(
+          CONVERSATION_KEY,
+          conversationId
+        );
+
+        console.log(
+          "Conversation ID saved:",
+          conversationId
+        );
+      }
+
+      /* ===============================
+         DISPLAY RESPONSE
+         =============================== */
 
       hideTyping();
 
       addMessage(
-        data.reply || "⚠️ No response received.",
+        data.reply ||
+        "⚠️ No response received.",
         "bot"
       );
 
     } catch (error) {
-      console.error("FarmFluence Error:", error);
+
+      console.error(
+        "FarmFluence Error:",
+        error
+      );
 
       hideTyping();
 
@@ -202,32 +305,56 @@
     }
   }
 
+  /* ===============================
+     SEND BUTTON
+     =============================== */
+
   sendBtn.onclick = sendMessage;
 
-  chatInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      sendMessage();
+  /* ===============================
+     ENTER KEY
+     =============================== */
+
+  chatInput.addEventListener(
+    "keydown",
+    (e) => {
+
+      if (e.key === "Enter") {
+        sendMessage();
+      }
+
     }
-  });
+  );
 
   /* ===============================
-     Voice Input
+     VOICE INPUT
      =============================== */
+
   micBtn.onclick = () => {
 
     if (!("webkitSpeechRecognition" in window)) {
-      alert("Voice input works only in Chrome.");
+
+      alert(
+        "Voice input works only in Chrome."
+      );
+
       return;
     }
 
-    const rec = new webkitSpeechRecognition();
+    const rec =
+      new webkitSpeechRecognition();
 
     rec.lang = "en-IN";
+
     rec.continuous = false;
+
     rec.interimResults = false;
 
     rec.onresult = (e) => {
-      chatInput.value = e.results[0][0].transcript;
+
+      chatInput.value =
+        e.results[0][0].transcript;
+
       sendMessage();
     };
 
@@ -235,8 +362,9 @@
   };
 
   /* ===============================
-     Init
+     INIT
      =============================== */
+
   closeChat();
 
   addMessage(
