@@ -6,6 +6,7 @@ import uuid
 from llm import ask_llm
 from context_builder import build_context
 
+
 app = Flask(
     __name__,
     template_folder="templates",
@@ -14,74 +15,83 @@ app = Flask(
 
 CORS(app)
 
-# --------------------------------------------------
+
+# ============================================================
 # IN-MEMORY CONVERSATION STORAGE
-# --------------------------------------------------
+# ============================================================
 
-conversations = {}
-
-MAX_HISTORY_MESSAGES = 10
+conversation_store = {}
 
 
-# --------------------------------------------------
+# ============================================================
 # HOME PAGE
-# --------------------------------------------------
+# ============================================================
 
 @app.route("/")
 def home():
     return render_template("index.html")
 
 
-# --------------------------------------------------
+# ============================================================
 # HEALTH CHECK
-# --------------------------------------------------
+# ============================================================
 
 @app.route("/health", methods=["GET"])
 def health():
-    return jsonify({"status": "ok"}), 200
+    return jsonify({
+        "status": "ok"
+    }), 200
 
 
-# --------------------------------------------------
+# ============================================================
 # CHAT API
-# --------------------------------------------------
+# ============================================================
 
 @app.route("/chat", methods=["POST"])
 def chat():
 
     try:
 
-        data = request.get_json(force=True)
+        data = request.get_json(force=True) or {}
 
-        user_message = data.get("message", "").strip()
+        user_message = str(
+            data.get("message", "")
+        ).strip()
 
-        # Accept either naming style from frontend
-        conversation_id = (
-            data.get("conversation_id")
-            or data.get("conversationId")
-        )
+        # ----------------------------------------------------
+        # GET OR CREATE CONVERSATION ID
+        # ----------------------------------------------------
 
-        # --------------------------------------------------
-        # EMPTY MESSAGE
-        # --------------------------------------------------
-
-        if not user_message:
-            return jsonify({
-                "reply": "Please type a farming related question."
-            }), 200
-
-        # --------------------------------------------------
-        # CREATE CONVERSATION ID IF NEEDED
-        # --------------------------------------------------
+        conversation_id = data.get("conversation_id")
 
         if not conversation_id:
             conversation_id = str(uuid.uuid4())
 
-        # --------------------------------------------------
+        # ----------------------------------------------------
+        # EMPTY MESSAGE
+        # ----------------------------------------------------
+
+        if not user_message:
+
+            return jsonify({
+                "reply": "Please type a farming related question.",
+                "conversation_id": conversation_id
+            }), 200
+
+        # ----------------------------------------------------
         # GET EXISTING HISTORY
-        # --------------------------------------------------
+        # ----------------------------------------------------
 
-        history = conversations.get(conversation_id, [])
+        history = conversation_store.get(
+            conversation_id,
+            []
+        )
 
+        # ----------------------------------------------------
+        # LOGGING
+        # ----------------------------------------------------
+
+        print("\n")
         print("=" * 50)
         print("FARMFLUENCE CHAT")
         print("CONVERSATION ID:", conversation_id)
@@ -89,11 +99,11 @@ def chat():
         print("USER:", user_message)
         print("=" * 50)
 
-        # --------------------------------------------------
+        # ----------------------------------------------------
         # HANDLE SIMPLE VAGUE INPUTS
-        # --------------------------------------------------
+        # ----------------------------------------------------
 
-        vague_inputs = [
+        vague_inputs = {
             "yes",
             "ok",
             "okay",
@@ -101,7 +111,7 @@ def chat():
             "ha",
             "hmm",
             "okok"
-        ]
+        }
 
         if user_message.lower() in vague_inputs:
 
@@ -114,53 +124,60 @@ def chat():
                 "5. Talk to an expert"
             )
 
-        else:
+            # Save conversation
+            history.append({
+                "role": "user",
+                "content": user_message
+            })
 
-            # --------------------------------------------------
-            # BUILD COMPLETE CONTEXT
-            # --------------------------------------------------
+            history.append({
+                "role": "assistant",
+                "content": reply
+            })
 
-            messages = build_context(
-                user_message=user_message,
-                history=history
-            )
+            conversation_store[conversation_id] = history
 
-            # --------------------------------------------------
-            # CALL LLM
-            # --------------------------------------------------
+            return jsonify({
+                "reply": reply,
+                "conversation_id": conversation_id
+            }), 200
 
-            reply = ask_llm(messages)
+        # ----------------------------------------------------
+        # BUILD LLM CONTEXT
+        # ----------------------------------------------------
 
-        # --------------------------------------------------
-        # SAVE USER MESSAGE
-        # --------------------------------------------------
+        messages = build_context(
+            user_message=user_message,
+            history=history
+        )
+
+        # ----------------------------------------------------
+        # CALL LLM
+        # ----------------------------------------------------
+
+        reply = ask_llm(messages)
+
+        # ----------------------------------------------------
+        # SAVE CURRENT CONVERSATION
+        # ----------------------------------------------------
 
         history.append({
             "role": "user",
             "content": user_message
         })
 
-        # --------------------------------------------------
-        # SAVE ASSISTANT RESPONSE
-        # --------------------------------------------------
-
         history.append({
             "role": "assistant",
             "content": reply
         })
 
-        # --------------------------------------------------
-        # LIMIT HISTORY
-        # --------------------------------------------------
+        # Keep only the latest 8 messages in server memory
+        # to avoid unlimited memory growth.
+        conversation_store[conversation_id] = history[-8:]
 
-        if len(history) > MAX_HISTORY_MESSAGES:
-            history = history[-MAX_HISTORY_MESSAGES:]
-
-        conversations[conversation_id] = history
-
-        # --------------------------------------------------
+        # ----------------------------------------------------
         # RETURN RESPONSE
-        # --------------------------------------------------
+        # ----------------------------------------------------
 
         return jsonify({
             "reply": reply,
@@ -169,7 +186,9 @@ def chat():
 
     except Exception as e:
 
-        print("ERROR in /chat:", e)
+        print("ERROR IN /chat:")
+        print(str(e))
+
         traceback.print_exc()
 
         return jsonify({
@@ -177,13 +196,13 @@ def chat():
         }), 500
 
 
-# --------------------------------------------------
+# ============================================================
 # RUN APPLICATION
-# --------------------------------------------------
+# ============================================================
 
 if __name__ == "__main__":
 
-    print(">>> FarmFluence server running <<<")
+    print(">>> FarmFluence AI server running <<<")
 
     app.run(
         host="0.0.0.0",
